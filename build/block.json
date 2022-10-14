@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "growtype/gallery",
+  "version": "0.1.0",
+  "title": "Growtype Gallery",
+  "category": "text",
+  "icon": "flag",
+  "description": "Use wp gallery in advanced way.",
+  "attributes": {
+    "shortcode": {
+      "type": "string",
+      "source": "text",
+      "selector": "div"
+    },
+    "post_type": {
+      "type": "string",
+      "default": "post"
+    },
+    "columns": {
+      "type": "string",
+      "default": "3"
+    },
+    "posts_per_page": {
+      "type": "string",
+      "default": "6"
+    },
+    "preview_style": {
+      "type": "string",
+      "default": "basic"
+    },
+    "preview_style_custom": {
+      "type": "string",
+      "default": ""
+    },
+    "slider": {
+      "type": "boolean",
+      "default": false
+    },
+    "slider_slides_amount_to_show": {
+      "type": "string",
+      "default": "4"
+    },
+    "parent_id": {
+      "type": "string",
+      "default": ""
+    },
+    "parent_class": {
+      "type": "string",
+      "default": ""
+    },
+    "post_link": {
+      "type": "boolean",
+      "default": "true"
+    },
+    "order": {
+      "type": "string",
+      "default": "asc"
+    },
+    "orderby": {
+      "type": "string",
+      "default": "date"
+    },
+    "intro_content_length": {
+      "type": "string",
+      "default": "100"
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "textdomain": "growtype-gallery",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css"
+}
