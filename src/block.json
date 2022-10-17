@@ -4,70 +4,185 @@
   "name": "growtype/gallery",
   "version": "0.1.0",
   "title": "Growtype Gallery",
-  "category": "text",
-  "icon": "flag",
+  "category": "media",
+  "icon": "awards",
   "description": "Use wp gallery in advanced way.",
+  "keywords": [
+    "images",
+    "photos"
+  ],
   "attributes": {
-    "shortcode": {
-      "type": "string",
-      "source": "text",
-      "selector": "div"
+    "images": {
+      "type": "array",
+      "default": [],
+      "source": "query",
+      "selector": ".blocks-gallery-item",
+      "query": {
+        "url": {
+          "type": "string",
+          "source": "attribute",
+          "selector": "img",
+          "attribute": "src"
+        },
+        "fullUrl": {
+          "type": "string",
+          "source": "attribute",
+          "selector": "img",
+          "attribute": "data-full-url"
+        },
+        "link": {
+          "type": "string",
+          "source": "attribute",
+          "selector": "img",
+          "attribute": "data-link"
+        },
+        "alt": {
+          "type": "string",
+          "source": "attribute",
+          "selector": "img",
+          "attribute": "alt",
+          "default": ""
+        },
+        "id": {
+          "type": "string",
+          "source": "attribute",
+          "selector": "img",
+          "attribute": "data-id"
+        },
+        "caption": {
+          "type": "string",
+          "source": "html",
+          "selector": ".blocks-gallery-item__caption"
+        }
+      }
     },
-    "post_type": {
-      "type": "string",
-      "default": "post"
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": []
+    },
+    "shortCodeTransforms": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
     },
     "columns": {
-      "type": "string",
-      "default": "3"
+      "type": "number",
+      "minimum": 1,
+      "maximum": 8
     },
-    "posts_per_page": {
+    "caption": {
       "type": "string",
-      "default": "6"
+      "source": "html",
+      "selector": ".blocks-gallery-caption"
     },
-    "preview_style": {
+    "imageCrop": {
+      "type": "boolean",
+      "default": true
+    },
+    "fixedHeight": {
+      "type": "boolean",
+      "default": true
+    },
+    "linkTarget": {
+      "type": "string"
+    },
+    "linkTo": {
+      "type": "string"
+    },
+    "sizeSlug": {
       "type": "string",
-      "default": "basic"
+      "default": "large"
     },
-    "preview_style_custom": {
-      "type": "string",
-      "default": ""
-    },
-    "slider": {
+    "allowResize": {
       "type": "boolean",
       "default": false
     },
-    "slider_slides_amount_to_show": {
-      "type": "string",
-      "default": "4"
-    },
-    "parent_id": {
+    "watermark": {
       "type": "string",
       "default": ""
     },
-    "parent_class": {
-      "type": "string",
-      "default": ""
-    },
-    "post_link": {
+    "hasOverlay": {
       "type": "boolean",
-      "default": "true"
+      "default": false
     },
-    "order": {
+    "overlayColor": {
       "type": "string",
-      "default": "asc"
+      "default": ""
     },
-    "orderby": {
-      "type": "string",
-      "default": "date"
+    "sliderActive": {
+      "type": "boolean",
+      "default": false
     },
-    "intro_content_length": {
+    "sliderSlidesAmountToShow": {
+      "type": "number",
+      "minimum": 1,
+      "default": 4,
+      "maximum": 8
+    },
+    "groupName": {
       "type": "string",
-      "default": "100"
+      "default": ""
+    },
+    "loaderActive": {
+      "type": "boolean",
+      "default": false
+    },
+    "loaderType": {
+      "type": "string",
+      "default": ""
+    },
+    "imageHeight": {
+      "type": "string",
+      "default": "100%"
+    },
+    "imageBorderRadius": {
+      "type": "string",
+      "default": "0px"
     }
   },
   "supports": {
-    "html": false
+    "anchor": true,
+    "align": true,
+    "html": false,
+    "units": [
+      "px",
+      "em",
+      "rem",
+      "vh",
+      "vw"
+    ],
+    "spacing": {
+      "margin": true,
+      "padding": true,
+      "blockGap": [
+        "horizontal",
+        "vertical"
+      ],
+      "__experimentalSkipSerialization": [
+        "blockGap"
+      ],
+      "__experimentalDefaultControls": {
+        "blockGap": true
+      }
+    },
+    "color": {
+      "text": false,
+      "background": true,
+      "gradients": true
+    },
+    "__experimentalLayout": {
+      "allowSwitching": false,
+      "allowInheriting": false,
+      "allowEditing": false,
+      "default": {
+        "type": "flex"
+      }
+    }
   },
   "textdomain": "growtype-gallery",
   "editorScript": "file:./index.js",

@@ -1,302 +1,713 @@
-import {__} from '@wordpress/i18n';
+/**
+ * External dependencies
+ */
+import classnames from 'classnames';
+import {find} from 'lodash';
 
 /**
- * WordPress components that create the necessary UI elements for the block
- *
- * @see https://developer.wordpress.org/block-editor/packages/packages-components/
+ * WordPress dependencies
  */
+import {compose} from '@wordpress/compose';
 import {
-    TextControl,
-    Panel,
+    BaseControl,
     PanelBody,
-    PanelRow,
-    CustomSelectControl,
     SelectControl,
     ToggleControl,
+    RangeControl,
+    Spinner,
+    TextControl,
+    ColorPicker,
     __experimentalNumberControl as NumberControl
 } from '@wordpress/components';
 
+import {
+    store as blockEditorStore,
+    MediaPlaceholder,
+    InspectorControls,
+    useBlockProps,
+    BlockControls,
+    MediaReplaceFlow,
+} from '@wordpress/block-editor';
+
+import {Platform, useEffect, useMemo} from '@wordpress/element';
+import {__, _x, sprintf} from '@wordpress/i18n';
+import {useSelect, useDispatch} from '@wordpress/data';
+import {withViewportMatch} from '@wordpress/viewport';
+import {View} from '@wordpress/primitives';
+import {createBlock} from '@wordpress/blocks';
+import {createBlobURL} from '@wordpress/blob';
+import {store as noticesStore} from '@wordpress/notices';
+
 /**
- * React hook that is used to mark the block wrapper element.
- * It provides all the necessary props like the class name.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
+ * Internal dependencies
  */
-import {PlainText, useBlockProps, ColorPalette, InspectorControls} from '@wordpress/block-editor';
+import {sharedIcon} from './shared-icon';
+import {defaultColumnsNumber, pickRelevantMediaFiles} from './shared';
+import {getHrefAndDestination} from './utils';
+import {
+    getUpdatedLinkTargetSettings,
+    getImageSizeAttributes,
+} from './image/utils';
+import Gallery from './gallery';
+import {
+    LINK_DESTINATION_ATTACHMENT,
+    LINK_DESTINATION_LIGHTBOX,
+    LINK_DESTINATION_MEDIA,
+    LINK_DESTINATION_NONE,
+} from './constants';
 
-import {useInstanceId} from '@wordpress/compose';
+import useImageSizes from './use-image-sizes';
+import useGetNewImages from './use-get-new-images';
+import useGetMedia from './use-get-media';
+import GapStyles from './gap-styles';
 
-import {Icon, shortcode} from '@wordpress/icons';
+const MAX_COLUMNS = 8;
+const linkOptions = [
+    {value: LINK_DESTINATION_ATTACHMENT, label: __('Attachment Page')},
+    {value: LINK_DESTINATION_MEDIA, label: __('Media File')},
+    {value: LINK_DESTINATION_NONE, label: _x('None', 'Media item link option')},
+    {value: LINK_DESTINATION_LIGHTBOX, label: _x('Lightbox')},
+];
 
-/**
- * The edit function describes the structure of your block in the context of the
- * editor. This represents what the editor will render when the block is used.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
- *
- * @param {Object}   props               Properties passed to the function.
- * @param {Object}   props.attributes    Available block attributes.
- * @param {Function} props.setAttributes Function that updates individual attributes.
- *
- * @return {WPElement} Element to render.
- */
-export default function Edit({attributes, setAttributes}) {
-    const blockProps = useBlockProps();
-    const instanceId = useInstanceId(Edit);
-    const inputId = `blocks-shortcode-input-${instanceId}`;
+const loaderTypes = [
+    {value: 'basic', label: __('Basic')},
+    {value: 'story', label: __('Story')}
+];
 
-    const updateShortcode = (attribute_key, val, inputType) => {
+const ALLOWED_MEDIA_TYPES = ['image'];
 
-        console.log(val, 'val')
+const PLACEHOLDER_TEXT = Platform.isNative
+    ? __('ADD MEDIA')
+    : __('Drag images, upload new ones or select files from your library.');
 
-        if (inputType === 'custom') {
-            setAttributes({[attribute_key]: val.selectedItem.value})
+const MOBILE_CONTROL_PROPS_RANGE_CONTROL = Platform.isNative
+    ? {type: 'stepper'}
+    : {};
+
+function GalleryEdit(props) {
+    const {
+        setAttributes,
+        attributes,
+        className,
+        clientId,
+        isSelected,
+        insertBlocksAfter,
+    } = props;
+
+    const {
+        columns,
+        imageCrop,
+        linkTarget,
+        linkTo,
+        sizeSlug,
+        hasOverlay,
+        overlayColor,
+        sliderActive,
+        sliderSlidesAmountToShow,
+        groupName,
+        loaderActive,
+        loaderType
+    } = attributes;
+
+    const {
+        __unstableMarkNextChangeAsNotPersistent,
+        replaceInnerBlocks,
+        updateBlockAttributes,
+        selectBlock,
+        clearSelectedBlock,
+    } = useDispatch(blockEditorStore);
+
+    const {createSuccessNotice, createErrorNotice} =
+        useDispatch(noticesStore);
+
+    const {getBlock, getSettings, preferredStyle} = useSelect((select) => {
+        const settings = select(blockEditorStore).getSettings();
+        const preferredStyleVariations =
+            settings.__experimentalPreferredStyleVariations;
+        return {
+            getBlock: select(blockEditorStore).getBlock,
+            getSettings: select(blockEditorStore).getSettings,
+            preferredStyle: preferredStyleVariations?.value?.['core/image'],
+        };
+    }, []);
+
+    const innerBlockImages = useSelect(
+        (select) => {
+            return select(blockEditorStore).getBlock(clientId)?.innerBlocks;
+        },
+        [clientId]
+    );
+
+    const wasBlockJustInserted = useSelect(
+        (select) => {
+            return select(blockEditorStore).wasBlockJustInserted(
+                clientId,
+                'inserter_menu'
+            );
+        },
+        [clientId]
+    );
+
+    const images = useMemo(
+        () =>
+            innerBlockImages?.map((block) => ({
+                clientId: block.clientId,
+                id: block.attributes.id,
+                url: block.attributes.url,
+                attributes: block.attributes,
+                fromSavedContent: Boolean(block.originalContent),
+            })),
+        [innerBlockImages]
+    );
+
+    const imageData = useGetMedia(innerBlockImages);
+
+    const newImages = useGetNewImages(images, imageData);
+
+    useEffect(() => {
+        newImages?.forEach((newImage) => {
+            // Update the images data without creating new undo levels.
+            __unstableMarkNextChangeAsNotPersistent();
+            updateBlockAttributes(newImage.clientId, {
+                ...buildImageAttributes(newImage.attributes),
+                id: newImage.id,
+                align: undefined,
+            });
+        });
+        if (newImages?.length > 0) {
+            clearSelectedBlock();
+        }
+    }, [newImages]);
+
+    const imageSizeOptions = useImageSizes(
+        imageData,
+        isSelected,
+        getSettings
+    );
+
+    /**
+     * Determines the image attributes that should be applied to an image block
+     * after the gallery updates.
+     *
+     * The gallery will receive the full collection of images when a new image
+     * is added. As a result we need to reapply the image's original settings if
+     * it already existed in the gallery. If the image is in fact new, we need
+     * to apply the gallery's current settings to the image.
+     *
+     * @param {Object} imageAttributes Media object for the actual image.
+     * @return {Object}                Attributes to set on the new image block.
+     */
+    function buildImageAttributes(imageAttributes) {
+        const image = imageAttributes.id
+            ? find(imageData, {id: imageAttributes.id})
+            : null;
+
+        let newClassName;
+        if (imageAttributes.className && imageAttributes.className !== '') {
+            newClassName = imageAttributes.className;
         } else {
-            setAttributes({[attribute_key]: val})
+            newClassName = preferredStyle
+                ? `is-style-${preferredStyle}`
+                : undefined;
         }
 
-        let shortcodeTag = '[growtype_gallery';
-        Object.entries(attributes).map(function (element) {
-            if (element[0] !== 'shortcode') {
-                let propertyKey = element[0];
-                let propertyValue = element[1];
+        let newLinkTarget;
+        if (imageAttributes.linkTarget || imageAttributes.rel) {
+            // When transformed from image blocks, the link destination and rel attributes are inherited.
+            newLinkTarget = {
+                linkTarget: imageAttributes.linkTarget,
+                rel: imageAttributes.rel,
+            };
+        } else {
+            // When an image is added, update the link destination and rel attributes according to the gallery settings
+            newLinkTarget = getUpdatedLinkTargetSettings(
+                linkTarget,
+                attributes
+            );
+        }
 
-                if (propertyKey === attribute_key) {
-                    if (inputType === 'custom') {
-                        propertyValue = val.selectedItem.value
-                    } else {
-                        propertyValue = val;
-                    }
-                }
-
-                if (typeof propertyValue === "boolean") {
-                    propertyValue = propertyValue ? 'true' : 'false'
-                }
-
-                if (propertyValue.length > 0) {
-                    shortcodeTag += ' ' + propertyKey + '=' + '"' + propertyValue + '"'
-                }
-            }
-        })
-
-        shortcodeTag += ']';
-
-        setAttributes({shortcode: shortcodeTag})
-    };
-
-    if (Object.entries(attributes).length === 0 || attributes.shortcode === '') {
-        attributes.shortcode = '[growtype_gallery]'
+        return {
+            ...pickRelevantMediaFiles(image, sizeSlug),
+            ...getHrefAndDestination(
+                image,
+                linkTo,
+                imageAttributes?.linkDestination
+            ),
+            ...newLinkTarget,
+            className: newClassName,
+            sizeSlug,
+            caption: imageAttributes.caption || image.caption?.raw,
+            alt: imageAttributes.alt || image.alt_text,
+        };
     }
 
-    console.log(attributes, 'attributes')
-    console.log(blockProps, 'blockProps')
+    function isValidFileType(file) {
+        return (
+            ALLOWED_MEDIA_TYPES.some(
+                (mediaType) => file.type?.indexOf(mediaType) === 0
+            ) || file.url?.indexOf('blob:') === 0
+        );
+    }
+
+    function updateImages(selectedImages) {
+        const newFileUploads =
+            Object.prototype.toString.call(selectedImages) ===
+            '[object FileList]';
+
+        const imageArray = newFileUploads
+            ? Array.from(selectedImages).map((file) => {
+                if (!file.url) {
+                    return pickRelevantMediaFiles({
+                        url: createBlobURL(file),
+                    });
+                }
+
+                return file;
+            })
+            : selectedImages;
+
+        if (!imageArray.every(isValidFileType)) {
+            createErrorNotice(
+                __(
+                    'If uploading to a gallery all files need to be image formats'
+                ),
+                {id: 'gallery-upload-invalid-file', type: 'snackbar'}
+            );
+        }
+
+        const processedImages = imageArray
+            .filter((file) => file.url || isValidFileType(file))
+            .map((file) => {
+                if (!file.url) {
+                    return pickRelevantMediaFiles({
+                        url: createBlobURL(file),
+                    });
+                }
+
+                return file;
+            });
+
+        // Because we are reusing existing innerImage blocks any reordering
+        // done in the media library will be lost so we need to reapply that ordering
+        // once the new image blocks are merged in with existing.
+        const newOrderMap = processedImages.reduce(
+            (result, image, index) => (
+                (result[image.id] = index), result
+            ),
+            {}
+        );
+
+        const existingImageBlocks = !newFileUploads
+            ? innerBlockImages.filter((block) =>
+                processedImages.find(
+                    (img) => img.id === block.attributes.id
+                )
+            )
+            : innerBlockImages;
+
+        const newImageList = processedImages.filter(
+            (img) =>
+                !existingImageBlocks.find(
+                    (existingImg) => img.id === existingImg.attributes.id
+                )
+        );
+
+        const newBlocks = newImageList.map((image) => {
+            return createBlock('core/image', {
+                id: image.id,
+                url: image.url,
+                caption: image.caption,
+                alt: image.alt,
+            });
+        });
+
+        if (newBlocks?.length > 0) {
+            selectBlock(newBlocks[0].clientId);
+        }
+
+        replaceInnerBlocks(
+            clientId,
+            existingImageBlocks
+                .concat(newBlocks)
+                .sort(
+                    (a, b) =>
+                        newOrderMap[a.attributes.id] -
+                        newOrderMap[b.attributes.id]
+                )
+        );
+    }
+
+    function onUploadError(message) {
+        createErrorNotice(message, {type: 'snackbar'});
+    }
+
+    function setLinkTo(value) {
+        setAttributes({linkTo: value});
+        const changedAttributes = {};
+        const blocks = [];
+        getBlock(clientId).innerBlocks.forEach((block) => {
+            blocks.push(block.clientId);
+            const image = block.attributes.id
+                ? find(imageData, {id: block.attributes.id})
+                : null;
+            changedAttributes[block.clientId] = getHrefAndDestination(
+                image,
+                value
+            );
+        });
+        updateBlockAttributes(blocks, changedAttributes, true);
+        const linkToText = [...linkOptions].find(
+            (linkType) => linkType.value === value
+        );
+
+        createSuccessNotice(
+            sprintf(
+                /* translators: %s: image size settings */
+                __('All gallery image links updated to: %s'),
+                linkToText.label
+            ),
+            {
+                id: 'gallery-attributes-linkTo',
+                type: 'snackbar',
+            }
+        );
+    }
+
+    function setColumnsNumber(value) {
+        setAttributes({columns: value});
+    }
+
+    function toggleImageCrop() {
+        setAttributes({imageCrop: !imageCrop});
+    }
+
+    function toggleSlider(slider) {
+        setAttributes({sliderActive: slider});
+    }
+
+    function getImageCropHelp(checked) {
+        return checked
+            ? __('Thumbnails are cropped to align.')
+            : __('Thumbnails are not cropped.');
+    }
+
+    function toggleOpenInNewTab(openInNewTab) {
+        const newLinkTarget = openInNewTab ? '_blank' : undefined;
+        setAttributes({linkTarget: newLinkTarget});
+        const changedAttributes = {};
+        const blocks = [];
+        getBlock(clientId).innerBlocks.forEach((block) => {
+            blocks.push(block.clientId);
+            changedAttributes[block.clientId] = getUpdatedLinkTargetSettings(
+                newLinkTarget,
+                block.attributes
+            );
+        });
+        updateBlockAttributes(blocks, changedAttributes, true);
+        const noticeText = openInNewTab
+            ? __('All gallery images updated to open in new tab')
+            : __('All gallery images updated to not open in new tab');
+        createSuccessNotice(noticeText, {
+            id: 'gallery-attributes-openInNewTab',
+            type: 'snackbar',
+        });
+    }
+
+    function toggleOverlay(overlay) {
+        setAttributes({hasOverlay: overlay});
+    }
+
+    function updateImagesSize(newSizeSlug) {
+        setAttributes({sizeSlug: newSizeSlug});
+        const changedAttributes = {};
+        const blocks = [];
+        getBlock(clientId).innerBlocks.forEach((block) => {
+            blocks.push(block.clientId);
+            const image = block.attributes.id
+                ? find(imageData, {id: block.attributes.id})
+                : null;
+            changedAttributes[block.clientId] = getImageSizeAttributes(
+                image,
+                newSizeSlug
+            );
+        });
+        updateBlockAttributes(blocks, changedAttributes, true);
+        const imageSize = imageSizeOptions.find(
+            (size) => size.value === newSizeSlug
+        );
+
+        createSuccessNotice(
+            sprintf(
+                /* translators: %s: image size settings */
+                __('All gallery image sizes updated to: %s'),
+                imageSize.label
+            ),
+            {
+                id: 'gallery-attributes-sizeSlug',
+                type: 'snackbar',
+            }
+        );
+    }
+
+    function setWatermark(value) {
+        setAttributes({watermark: value});
+    }
+
+    function setOverlayColor(value) {
+        setAttributes({overlayColor: value});
+    }
+
+    function setSliderSlidesAmount(value) {
+        setAttributes({sliderSlidesAmountToShow: value});
+    }
+
+    function setGroupName(value) {
+        setAttributes({groupName: value});
+    }
+
+    function toggleLoader(value) {
+        setAttributes({loaderActive: value});
+    }
+
+    useEffect(() => {
+        // linkTo attribute must be saved so blocks don't break when changing image_default_link_type in options.php.
+        if (!linkTo) {
+            __unstableMarkNextChangeAsNotPersistent();
+            setAttributes({
+                linkTo:
+                    window?.wp?.media?.view?.settings?.defaultProps?.link ||
+                    LINK_DESTINATION_LIGHTBOX,
+            });
+        }
+    }, [linkTo]);
+
+    const hasImages = !!images.length;
+
+    const hasImageIds = hasImages && images.some((image) => !!image.id);
+    const imagesUploading = images.some((img) =>
+        !Platform.isNative
+            ? !img.id && img.url?.indexOf('blob:') === 0
+            : img.url?.indexOf('file:') === 0
+    );
+
+    // MediaPlaceholder props are different between web and native hence, we provide a platform-specific set.
+    const mediaPlaceholderProps = Platform.select({
+        web: {
+            addToGallery: false,
+            disableMediaButtons: imagesUploading,
+            value: {},
+        },
+        native: {
+            addToGallery: hasImageIds,
+            isAppender: hasImages,
+            disableMediaButtons:
+                (hasImages && !isSelected) || imagesUploading,
+            value: hasImageIds ? images : {},
+            autoOpenMediaUpload:
+                !hasImages && isSelected && wasBlockJustInserted,
+        },
+    });
+
+    const mediaPlaceholder = (
+        <MediaPlaceholder
+            handleUpload={false}
+            icon={sharedIcon}
+            labels={{
+                title: __('Gallery'),
+                instructions: PLACEHOLDER_TEXT,
+            }}
+            onSelect={updateImages}
+            accept="image/*"
+            allowedTypes={ALLOWED_MEDIA_TYPES}
+            multiple
+            onError={onUploadError}
+            {...mediaPlaceholderProps}
+        />
+    );
+
+    const blockProps = useBlockProps({
+        className: classnames(className, 'has-nested-images'),
+    });
+
+    if (!hasImages) {
+        return <View {...blockProps}>{mediaPlaceholder}</View>;
+    }
+
+    const hasLinkTo = linkTo && linkTo !== 'none';
 
     return (
-        <div {...blockProps}>
-            <InspectorControls key={'inspector'}>
-                <Panel>
-                    <PanelBody
-                        title={__('Main settings', 'wholesome-plugin')}
-                        icon="admin-plugins"
-                    >
-                        <PanelRow>
-                            <TextControl
-                                label={__('Post type', 'growtype-gallery')}
-                                help={__('Enter which post type should be used.', 'growtype-gallery')}
-                                onChange={(val) => updateShortcode('post_type', val)}
-                                value={attributes.post_type}
-                            />
-                        </PanelRow>
-                        <PanelRow>
-                            <SelectControl
-                                label="Order"
-                                help={__('How post should be ordered.', 'growtype-gallery')}
-                                options={[
-                                    {
-                                        label: 'ASC',
-                                        value: 'asc',
-                                    },
-                                    {
-                                        label: 'DESC',
-                                        value: 'desc',
-                                    }
-                                ]}
-                                value={attributes.order}
-                                onChange={(val) => updateShortcode('order', val)}
-                            />
-                        </PanelRow>
-                        <PanelRow>
-                            <SelectControl
-                                label="Order by"
-                                help={__('According to what posts to should be ordered.', 'growtype-gallery')}
-                                options={[
-                                    {
-                                        label: 'Date',
-                                        value: 'date',
-                                    },
-                                    {
-                                        label: 'Menu order',
-                                        value: 'menu_order',
-                                    },
-                                    {
-                                        label: 'Name',
-                                        value: 'name',
-                                    },
-                                ]}
-                                value={attributes.orderby}
-                                onChange={(val) => updateShortcode('orderby', val)}
-                            />
-                        </PanelRow>
-                        <PanelRow>
-                            <ToggleControl
-                                label="Post link"
-                                help={
-                                    attributes.post_link
-                                        ? 'Post is a link.'
-                                        : 'Post is not a link.'
-                                }
-                                checked={attributes.post_link ? true : false}
-                                onChange={(val) => updateShortcode('post_link', val)}
-                            />
-                        </PanelRow>
-                        <PanelRow>
-                            <TextControl
-                                label={__('Parent class', 'growtype-gallery')}
-                                onChange={(val) => updateShortcode('parent_class', val)}
-                                value={attributes.id}
-                            />
-                        </PanelRow>
-                        <PanelRow>
-                            <TextControl
-                                label={__('Parent ID', 'growtype-gallery')}
-                                onChange={(val) => updateShortcode('parent_id', val)}
-                                value={attributes.id}
-                            />
-                        </PanelRow>
-                    </PanelBody>
-                    <PanelBody
-                        title={__('Preview settings', 'wholesome-plugin')}
-                        icon="admin-plugins"
-                    >
-                        <PanelRow>
-                            <TextControl
-                                label={__('Columns', 'growtype-gallery')}
-                                help={__('How many columns in grid.', 'growtype-gallery')}
-                                onChange={(val) => updateShortcode('columns', val)}
-                                value={attributes.columns}
-                            />
-                        </PanelRow>
-                        <PanelRow>
-                            <TextControl
-                                label={__('Posts per page', 'growtype-gallery')}
-                                help={__('How many posts should be returned.', 'growtype-gallery')}
-                                onChange={(val) => updateShortcode('posts_per_page', val)}
-                                value={attributes.posts_per_page}
-                            />
-                        </PanelRow>
-                        <PanelRow>
-                            <SelectControl
-                                label="Post preview style"
-                                help={__('How post preview should look.', 'growtype-gallery')}
-                                options={[
-                                    {
-                                        label: 'Basic',
-                                        value: 'basic',
-                                    },
-                                    {
-                                        label: 'Blog',
-                                        value: 'blog',
-                                    },
-                                    {
-                                        label: 'Content',
-                                        value: 'content',
-                                    },
-                                    {
-                                        label: 'Review',
-                                        value: 'review',
-                                    },
-                                    {
-                                        label: 'Testimonial',
-                                        value: 'testimonial',
-                                    },
-                                    {
-                                        label: 'Custom',
-                                        value: 'custom',
-                                    }
-                                ]}
-                                value={attributes.preview_style}
-                                onChange={(val) => updateShortcode('preview_style', val)}
-                            />
-                        </PanelRow>
-                        {attributes.preview_style === 'custom' ?
-                            <PanelRow>
-                                <TextControl
-                                    label={__('Custom preview style', 'growtype-gallery')}
-                                    help={__('Custom preview look.', 'growtype-gallery')}
-                                    onChange={(val) => updateShortcode('preview_style_custom', val)}
-                                    value={attributes.preview_style_custom}
-                                />
-                            </PanelRow>
-                            :
-                            ''
-                        }
-                        <PanelRow>
-                            <NumberControl
-                                label="Intro content length"
-                                help={__('Post preview intro content text characters amount.', 'growtype-gallery')}
-                                isShiftStepEnabled={false}
-                                onChange={(val) => updateShortcode('intro_content_length', val)}
-                                value={attributes.intro_content_length}
-                                min={1}
-                            />
-                        </PanelRow>
-                    </PanelBody>
-                    <PanelBody
-                        title={__('Slider settings', 'wholesome-plugin')}
-                        icon="admin-plugins"
-                    >
-                        <PanelRow>
-                            <ToggleControl
-                                label="Active"
-                                help={
-                                    attributes.slider
-                                        ? 'Showed in a slider.'
-                                        : 'Showed without slider.'
-                                }
-                                checked={attributes.slider ? true : false}
-                                onChange={(val) => updateShortcode('slider', val)}
-                            />
-                        </PanelRow>
-                        <PanelRow>
-                            <NumberControl
-                                label="Slides amount to show"
-                                isShiftStepEnabled={false}
-                                onChange={(val) => updateShortcode('slider_slides_amount_to_show', val)}
-                                value={attributes.slider_slides_amount_to_show}
-                                min={1}
-                            />
-                        </PanelRow>
-                    </PanelBody>
-                </Panel>
-            </InspectorControls>
+        <>
+            <InspectorControls>
+                <PanelBody title={__('Settings')}>
+                    <SelectControl
+                        label={__('Link to')}
+                        value={linkTo}
+                        onChange={setLinkTo}
+                        options={linkOptions}
+                        hideCancelButton={true}
+                    />
+                    {hasLinkTo && (
+                        <ToggleControl
+                            label={__('Open in new tab')}
+                            checked={linkTarget === '_blank'}
+                            onChange={toggleOpenInNewTab}
+                        />
+                    )}
 
-            <div {...useBlockProps({className: 'components-placeholder'})}>
-                <label
-                    htmlFor={inputId}
-                    className="components-placeholder__label"
+                    {linkTo === 'lightbox' && (
+                        <TextControl
+                            label={__('Group name', 'growtype-gallery')}
+                            help={__('Images are related by group name.', 'growtype-gallery')}
+                            onChange={setGroupName}
+                            value={attributes.groupName}
+                        />
+                    )}
+
+                    {imageSizeOptions?.length > 0 && (
+                        <SelectControl
+                            label={__('Image size')}
+                            value={sizeSlug}
+                            options={imageSizeOptions}
+                            onChange={updateImagesSize}
+                            hideCancelButton={true}
+                        />
+                    )}
+                    {Platform.isWeb && !imageSizeOptions && hasImageIds && (
+                        <BaseControl className={'gallery-image-sizes'}>
+                            <BaseControl.VisualLabel>
+                                {__('Image size')}
+                            </BaseControl.VisualLabel>
+                            <View className={'gallery-image-sizes__loading'}>
+                                <Spinner/>
+                                {__('Loading options…')}
+                            </View>
+                        </BaseControl>
+                    )}
+                    <TextControl
+                        label={__('Watermark', 'growtype-gallery')}
+                        help={__('Visible on every image.', 'growtype-gallery')}
+                        onChange={setWatermark}
+                        value={attributes.watermark}
+                    />
+                </PanelBody>
+                <PanelBody
+                    title={__('Preview', 'growtype-gallery')}
                 >
-                    <Icon icon={shortcode}/>
-                    {__('Growtype gallery shortcode')}
-                </label>
-                <PlainText
-                    className="blocks-shortcode__textarea"
-                    id={inputId}
-                    value={attributes.shortcode}
-                    aria-label={__('Shortcode text')}
-                    placeholder={__('Write shortcode here…')}
-                    onChange={(val) => setAttributes({shortcode: val})}
+                    {images.length > 1 && (
+                        <RangeControl
+                            label={__('Columns')}
+                            value={
+                                columns
+                                    ? columns
+                                    : defaultColumnsNumber(images.length)
+                            }
+                            onChange={setColumnsNumber}
+                            min={1}
+                            max={Math.min(MAX_COLUMNS, images.length)}
+                            {...MOBILE_CONTROL_PROPS_RANGE_CONTROL}
+                            required
+                        />
+                    )}
+                    <TextControl
+                        label={__('Image height', 'growtype-gallery')}
+                        onChange={(value) => setAttributes({imageHeight: value})}
+                        value={attributes.imageHeight}
+                    />
+                    <TextControl
+                        label={__('Image border radius', 'growtype-gallery')}
+                        onChange={(value) => setAttributes({imageBorderRadius: value})}
+                        value={attributes.imageBorderRadius}
+                    />
+                    <ToggleControl
+                        label={__('Crop images')}
+                        checked={!imageCrop}
+                        onChange={toggleImageCrop}
+                        help={getImageCropHelp}
+                    />
+                    <ToggleControl
+                        label={__('Has overlay')}
+                        checked={hasOverlay}
+                        onChange={toggleOverlay}
+                    />
+                    {hasOverlay && (
+                        <ColorPicker
+                            label={__('Overlay color')}
+                            color={overlayColor}
+                            onChange={setOverlayColor}
+                            enableAlpha="true"
+                            defaultValue=""
+                            copyFormat="rgb"
+                        />
+                    )}
+                </PanelBody>
+                <PanelBody
+                    title={__('Slider', 'growtype-gallery')}
+                >
+                    <ToggleControl
+                        label={__('Slider active')}
+                        checked={sliderActive}
+                        onChange={toggleSlider}
+                    />
+                    <RangeControl
+                        label={__('Slides amount to show')}
+                        value={sliderSlidesAmountToShow}
+                        onChange={setSliderSlidesAmount}
+                        min={1}
+                        max={8}
+                    />
+                </PanelBody>
+                <PanelBody
+                    title={__('Loading', 'growtype-gallery')}
+                >
+                    <ToggleControl
+                        label={__('Loader active')}
+                        checked={loaderActive}
+                        onChange={toggleLoader}
+                    />
+                    <SelectControl
+                        label={__('Loader type')}
+                        value={loaderType}
+                        options={loaderTypes}
+                        onChange={(value) => setAttributes({loaderType: value})}
+                        hideCancelButton={true}
+                    />
+                </PanelBody>
+            </InspectorControls>
+            <BlockControls group="other">
+                <MediaReplaceFlow
+                    allowedTypes={ALLOWED_MEDIA_TYPES}
+                    accept="image/*"
+                    handleUpload={false}
+                    onSelect={updateImages}
+                    name={__('Add')}
+                    multiple={true}
+                    mediaIds={images
+                        .filter((image) => image.id)
+                        .map((image) => image.id)}
+                    addToGallery={hasImageIds}
                 />
-            </div>
-        </div>
+            </BlockControls>
+            {Platform.isWeb && (
+                <GapStyles
+                    blockGap={attributes.style?.spacing?.blockGap}
+                    clientId={clientId}
+                />
+            )}
+            <Gallery
+                {...props}
+                images={images}
+                mediaPlaceholder={
+                    !hasImages || Platform.isNative
+                        ? mediaPlaceholder
+                        : undefined
+                }
+                blockProps={blockProps}
+                insertBlocksAfter={insertBlocksAfter}
+            />
+        </>
     );
 }
+
+export default (
+    GalleryEdit
+);
