@@ -25,6 +25,12 @@
       }
     }
   }
+
+  &[data-slider-overflow="initial"] {
+    .slick-list {
+      overflow: initial;
+    }
+  }
 }
 
 .wp-block-growtype-gallery {
@@ -117,5 +123,10 @@
       top: 0;
       width: 100%;
     }
+  }
+
+  &.slick-initialized {
+    display: inline-block !important;
+    width: 100%;
   }
 }

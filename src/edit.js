@@ -69,11 +69,6 @@ const linkOptions = [
     {value: LINK_DESTINATION_LIGHTBOX, label: _x('Lightbox')},
 ];
 
-const loaderTypes = [
-    {value: 'basic', label: __('Basic')},
-    {value: 'story', label: __('Story')}
-];
-
 const ALLOWED_MEDIA_TYPES = ['image'];
 
 const PLACEHOLDER_TEXT = Platform.isNative
@@ -106,7 +101,10 @@ function GalleryEdit(props) {
         sliderSlidesAmountToShow,
         groupName,
         loaderActive,
-        loaderType
+        loaderType,
+        sliderOverflow,
+        sliderInfinite,
+        sliderCenterMode,
     } = attributes;
 
     const {
@@ -649,11 +647,31 @@ function GalleryEdit(props) {
                         onChange={toggleSlider}
                     />
                     <RangeControl
-                        label={__('Slides amount to show')}
+                        label={__('Slides to show')}
                         value={sliderSlidesAmountToShow}
                         onChange={setSliderSlidesAmount}
                         min={1}
                         max={8}
+                    />
+                    <SelectControl
+                        label={__('Overflow')}
+                        value={sliderOverflow}
+                        options={[
+                            {value: 'hidden', label: __('Hidden')},
+                            {value: 'initial', label: __('Initial')}
+                        ]}
+                        onChange={(value) => setAttributes({sliderOverflow: value})}
+                        hideCancelButton={true}
+                    />
+                    <ToggleControl
+                        label={__('Infinite')}
+                        checked={sliderInfinite}
+                        onChange={(value) => setAttributes({sliderInfinite: value})}
+                    />
+                    <ToggleControl
+                        label={__('Center mode')}
+                        checked={sliderCenterMode}
+                        onChange={(value) => setAttributes({sliderCenterMode: value})}
                     />
                 </PanelBody>
                 <PanelBody
@@ -667,7 +685,10 @@ function GalleryEdit(props) {
                     <SelectControl
                         label={__('Loader type')}
                         value={loaderType}
-                        options={loaderTypes}
+                        options={[
+                            {value: 'basic', label: __('Basic')},
+                            {value: 'story', label: __('Story')}
+                        ]}
                         onChange={(value) => setAttributes({loaderType: value})}
                         hideCancelButton={true}
                     />

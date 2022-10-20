@@ -196,6 +196,7 @@ class Growtype_Gallery_Admin
             echo "<a class='nav-tab$class' href='?page=growtype-gallery-settings&tab=$tab'>$name</a>";
 
         }
+        
         echo '</h2>';
     }
 

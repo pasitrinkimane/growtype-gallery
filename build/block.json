@@ -124,6 +124,18 @@
       "default": 4,
       "maximum": 8
     },
+    "sliderOverflow": {
+      "type": "string",
+      "default": "hidden"
+    },
+    "sliderInfinite": {
+      "type": "boolean",
+      "default": false
+    },
+    "sliderCenterMode": {
+      "type": "boolean",
+      "default": false
+    },
     "groupName": {
       "type": "string",
       "default": ""
