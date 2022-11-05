@@ -125,7 +125,7 @@ class Growtype_Gallery_Block
                         $original_img_src = $xpath->evaluate("string(//img/@src)");
                         $original_img_class = $xpath->evaluate("string(//img/@class)");
                         $original_img_alt = $xpath->evaluate("string(//img/@alt)");
-                        $original_img_caption = $xpath->evaluate("string(//img/@caption)");
+                        $original_img_caption = $xpath->evaluate("string(//figcaption)");
                         $original_img_id = str_replace('wp-image-', '', $original_img_class);
 
                         $original_image_url = wp_get_attachment_url($original_img_id);

@@ -73,7 +73,7 @@ export function storyLoader() {
         stopStoryDisplayInterval($(this).find('.slick-slider').attr('data-slider-key'));
     });
 
-    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"].slider-active .slick-slide').mouseenter(function () {
+    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .wp-block-image').mouseenter(function () {
         displayStoryItem($(this), false);
     });
 
@@ -85,7 +85,7 @@ export function storyLoader() {
         startStoryDisplayInterval(sliderKey)
     });
 
-    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"].slider-active .slick-slide').mouseleave(function () {
+    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .wp-block-image').mouseleave(function () {
         returnStoryItemsToInitialState($(this))
     });
 

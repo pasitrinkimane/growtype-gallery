@@ -7,7 +7,7 @@ class Growtype_Gallery_Shortcode
 {
     function __construct()
     {
-        if (!is_admin()) {
+        if (!is_admin() && !wp_is_json_request()) {
             add_shortcode('growtype_gallery', array ($this, 'growtype_gallery_shortcode'));
         }
     }

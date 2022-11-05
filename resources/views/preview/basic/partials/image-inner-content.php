@@ -1,3 +1,8 @@
+<?php if ($caption) { ?>
+    <div class="caption">
+        <p><?php echo $caption ?></p>
+    </div>
+<?php } ?>
 <?php if ($loader_active) { ?>
     <div class="loader">
         <div class="loader-inner" data-progress="0"></div>
