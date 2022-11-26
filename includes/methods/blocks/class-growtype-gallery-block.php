@@ -127,6 +127,7 @@ class Growtype_Gallery_Block
                         $original_img_alt = $xpath->evaluate("string(//img/@alt)");
                         $original_img_caption = $xpath->evaluate("string(//figcaption)");
                         $original_img_id = str_replace('wp-image-', '', $original_img_class);
+                        $original_img_caption_link = $xpath->evaluate("string(//a/@href)");
 
                         $original_image_url = wp_get_attachment_url($original_img_id);
 
@@ -141,6 +142,7 @@ class Growtype_Gallery_Block
                                 'child_class' => $original_img_class,
                                 'alt' => $original_img_alt,
                                 'caption' => $original_img_caption,
+                                'caption_link' => $original_img_caption_link,
                                 'overlay' => $has_overlay,
                                 'overlay_color' => $overlay_color,
                                 'overlay_icon' => $overlay_icon ?? false,

@@ -1,6 +1,6 @@
 <?php if ($caption) { ?>
     <div class="caption">
-        <p><?php echo $caption ?></p>
+        <?php echo !empty($caption_link) ? '<a href="' . $caption_link . '" target="_blank">' . $caption . '</a>' : $caption ?>
     </div>
 <?php } ?>
 <?php if ($loader_active) { ?>
