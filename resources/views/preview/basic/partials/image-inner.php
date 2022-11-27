@@ -1,3 +1,9 @@
+<?php
+if (isset($image_url) && !empty($image_url)) {
+    echo '<a href="' . $image_url . '" class="wp-block-image-wrapper">';
+}
+?>
+
 <div class="wp-block-image-inner"
      alt="<?php echo $alt; ?>"
      title="<?php echo $caption; ?>"
@@ -10,3 +16,9 @@
 >
     <?php include('image-inner-content.php') ?>
 </div>
+
+<?php
+if (isset($image_url) && !empty($image_url)) {
+    echo '</a>';
+}
+?>

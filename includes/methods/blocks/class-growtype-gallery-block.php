@@ -120,6 +120,9 @@ class Growtype_Gallery_Block
                          */
                         $doc = new DOMDocument();
                         $doc->loadHTML($original_img_html);
+
+                        $links_amount = $doc->getElementsByTagName('a')->length;
+
                         $xpath = new DOMXPath($doc);
                         $original_figure_class = $xpath->evaluate("string(//figure/@class)");
                         $original_img_src = $xpath->evaluate("string(//img/@src)");
@@ -127,7 +130,15 @@ class Growtype_Gallery_Block
                         $original_img_alt = $xpath->evaluate("string(//img/@alt)");
                         $original_img_caption = $xpath->evaluate("string(//figcaption)");
                         $original_img_id = str_replace('wp-image-', '', $original_img_class);
-                        $original_img_caption_link = $xpath->evaluate("string(//a/@href)");
+                        $caption_url = $xpath->evaluate("string(//a/@href)");
+                        $image_url = '';
+
+                        if ($links_amount === 3 || !empty($original_img_caption) && $links_amount === 2) {
+                            $caption_url = '';
+                            $image_url = $xpath->evaluate("string(//a/@href)");
+                        } elseif (empty($original_img_caption) && $links_amount === 1) {
+                            $image_url = $xpath->evaluate("string(//a/@href)");
+                        }
 
                         $original_image_url = wp_get_attachment_url($original_img_id);
 
@@ -142,7 +153,7 @@ class Growtype_Gallery_Block
                                 'child_class' => $original_img_class,
                                 'alt' => $original_img_alt,
                                 'caption' => $original_img_caption,
-                                'caption_link' => $original_img_caption_link,
+                                'caption_link' => $caption_url,
                                 'overlay' => $has_overlay,
                                 'overlay_color' => $overlay_color,
                                 'overlay_icon' => $overlay_icon ?? false,
@@ -150,6 +161,7 @@ class Growtype_Gallery_Block
                                 'link_to' => $link_to,
                                 'group_name' => $group_name,
                                 'image_height' => $image_height,
+                                'image_url' => $image_url,
                                 'image_border_radius' => $image_border_radius,
                                 'loader_active' => $loader_active,
                                 'loader_type' => $loader_type,
