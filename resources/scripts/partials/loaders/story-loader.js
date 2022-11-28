@@ -1,7 +1,6 @@
 /**
  * Instagram like stories
  */
-
 export function storyLoader() {
     $ = jQuery;
 
@@ -69,8 +68,8 @@ export function storyLoader() {
      * Mouse enter
      */
     $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"]').mouseenter(function () {
-        let sliderKey = $(this).find('.slick-slider').attr('data-slider-key');
-        stopStoryDisplayInterval($(this).find('.slick-slider').attr('data-slider-key'));
+        let sliderKey = $(this).attr('id');
+        stopStoryDisplayInterval(sliderKey);
     });
 
     $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .wp-block-image').mouseenter(function () {
@@ -81,7 +80,7 @@ export function storyLoader() {
      * Mouse leave
      */
     $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"]').mouseleave(function () {
-        let sliderKey = $(this).find('.slick-slider').attr('data-slider-key');
+        let sliderKey = $(this).attr('id');
         startStoryDisplayInterval(sliderKey)
     });
 
@@ -93,9 +92,9 @@ export function storyLoader() {
      *
      */
     function initStoryDisplayInterval() {
-        if ($('.growtype-gallery-wrapper.loader-active[data-loader-type="story"].slider-active').length > 0) {
-            $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"].slider-active').each(function (index, element) {
-                let sliderKey = $(element).find('.slick-slider').attr('data-slider-key');
+        if ($('.growtype-gallery-wrapper.loader-active[data-loader-type="story"]').length > 0) {
+            $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"]').each(function (index, element) {
+                let sliderKey = $(element).attr('id');
 
                 startStoryDisplayInterval(sliderKey);
             });
@@ -111,17 +110,17 @@ export function storyLoader() {
         window.growtypeGallery.loader[sliderKey]['interval'] = setInterval(function () {
             if (document.hasFocus()) {
 
-                if (window.growtypeGallery.loader[sliderKey]['counter'] > $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .slick-slider[data-slider-key="' + sliderKey + '"] .slick-slide:not(.slick-cloned)').length - 1) {
+                if (window.growtypeGallery.loader[sliderKey]['counter'] > $('#' + sliderKey + '.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .slick-slider .slick-slide:not(.slick-cloned)').length - 1) {
                     window.growtypeGallery.loader[sliderKey]['counter'] = 0
                 }
 
-                let activeSlide = $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .slick-slider[data-slider-key="' + sliderKey + '"]').find('.slick-slide[data-slick-index="' + window.growtypeGallery.loader[sliderKey]['counter'] + '"]')
+                let activeSlide = $('#' + sliderKey + '.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .slick-slider').find('.slick-slide[data-slick-index="' + window.growtypeGallery.loader[sliderKey]['counter'] + '"]')
 
                 if (activeSlide.length > 0) {
                     displayStoryItem(activeSlide);
 
                     if (!activeSlide.hasClass('slick-active')) {
-                        $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .slick-slider[data-slider-key="' + sliderKey + '"]').slick('slickGoTo', window.growtypeGallery.loader[sliderKey]['counter'])
+                        $('#' + sliderKey + '.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .slick-slider').slick('slickGoTo', window.growtypeGallery.loader[sliderKey]['counter'])
                     }
                 }
 

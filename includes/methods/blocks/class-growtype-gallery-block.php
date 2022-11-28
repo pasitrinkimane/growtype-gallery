@@ -114,6 +114,7 @@ class Growtype_Gallery_Block
                         $original_img_html = $parsed_block['innerBlocks'][$key]['innerContent'][0];
                         $loader_active = $parsed_block["attrs"]['loaderActive'] ?? false;
                         $loader_type = $parsed_block["attrs"]['loaderType'] ?? 'basic';
+                        $gallery_id = isset($parsed_block["attrs"]['galleryId']) && !empty($parsed_block["attrs"]['galleryId']) ? $parsed_block["attrs"]['galleryId'] : 'growtype-gallery-' . md5(rand());
 
                         /**
                          * get original html parts
@@ -172,24 +173,15 @@ class Growtype_Gallery_Block
                     }
                 }
 
-                $slider_active = $parsed_block["attrs"]['sliderActive'] ?? false;
-                $slider_slides_amount_to_show = $parsed_block["attrs"]['sliderSlidesAmountToShow'] ?? '4';
                 $loader_active = $parsed_block["attrs"]['loaderActive'] ?? false;
                 $loader_type = $parsed_block["attrs"]['loaderType'] ?? '';
-                $slider_overflow = $parsed_block["attrs"]['sliderOverflow'] ?? 'hidden';
-                $slider_infinite = isset($parsed_block["attrs"]['sliderInfinite']) && $parsed_block["attrs"]['sliderInfinite'] ? 'true' : 'false';
-                $slider_center_mode = isset($parsed_block["attrs"]['sliderCenterMode']) && $parsed_block["attrs"]['sliderCenterMode'] ? 'true' : 'false';
 
                 $images = implode('', $images);
 
                 ob_start();
 
                 ?>
-                <div class="growtype-gallery-wrapper <?php echo $slider_active ? 'slider-active' : '' ?> <?php echo $loader_active ? 'loader-active' : '' ?>"
-                     data-slides-amount-to-show="<?php echo $slider_slides_amount_to_show ?>"
-                     data-slider-overflow="<?php echo $slider_overflow ?>"
-                     data-slider-infinite="<?php echo $slider_infinite ?>"
-                     data-slider-center-mode="<?php echo $slider_center_mode ?>"
+                <div id="<?php echo $gallery_id ?>" class="growtype-gallery-wrapper <?php echo $loader_active ? 'loader-active' : '' ?>"
                      data-loader-type="<?php echo $loader_type ?>"
                 >
                     <figure class="<?php echo $parent_figure_class ?>">

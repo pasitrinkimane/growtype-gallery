@@ -1,4 +1,14 @@
 .wp-block-growtype-gallery {
+  a.wp-block-image-wrapper {
+    opacity: 0.8;
+    transition: all 0.5s;
+
+    &:hover {
+      opacity: 1;
+      transition: all 0.5s;
+    }
+  }
+
   .wp-block-image-inner {
     .caption {
       position: absolute;

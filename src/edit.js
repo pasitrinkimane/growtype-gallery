@@ -26,7 +26,7 @@ import {
     InspectorControls,
     useBlockProps,
     BlockControls,
-    MediaReplaceFlow,
+    MediaReplaceFlow, InspectorAdvancedControls,
 } from '@wordpress/block-editor';
 
 import {Platform, useEffect, useMemo} from '@wordpress/element';
@@ -97,14 +97,9 @@ function GalleryEdit(props) {
         sizeSlug,
         hasOverlay,
         overlayColor,
-        sliderActive,
-        sliderSlidesAmountToShow,
         groupName,
         loaderActive,
         loaderType,
-        sliderOverflow,
-        sliderInfinite,
-        sliderCenterMode,
     } = attributes;
 
     const {
@@ -379,10 +374,6 @@ function GalleryEdit(props) {
         setAttributes({imageCrop: !imageCrop});
     }
 
-    function toggleSlider(slider) {
-        setAttributes({sliderActive: slider});
-    }
-
     function getImageCropHelp(checked) {
         return checked
             ? __('Thumbnails are cropped to align.')
@@ -453,10 +444,6 @@ function GalleryEdit(props) {
 
     function setOverlayColor(value) {
         setAttributes({overlayColor: value});
-    }
-
-    function setSliderSlidesAmount(value) {
-        setAttributes({sliderSlidesAmountToShow: value});
     }
 
     function setGroupName(value) {
@@ -639,42 +626,6 @@ function GalleryEdit(props) {
                     )}
                 </PanelBody>
                 <PanelBody
-                    title={__('Slider', 'growtype-gallery')}
-                >
-                    <ToggleControl
-                        label={__('Slider active')}
-                        checked={sliderActive}
-                        onChange={toggleSlider}
-                    />
-                    <RangeControl
-                        label={__('Slides to show')}
-                        value={sliderSlidesAmountToShow}
-                        onChange={setSliderSlidesAmount}
-                        min={1}
-                        max={8}
-                    />
-                    <SelectControl
-                        label={__('Overflow')}
-                        value={sliderOverflow}
-                        options={[
-                            {value: 'hidden', label: __('Hidden')},
-                            {value: 'initial', label: __('Initial')}
-                        ]}
-                        onChange={(value) => setAttributes({sliderOverflow: value})}
-                        hideCancelButton={true}
-                    />
-                    <ToggleControl
-                        label={__('Infinite')}
-                        checked={sliderInfinite}
-                        onChange={(value) => setAttributes({sliderInfinite: value})}
-                    />
-                    <ToggleControl
-                        label={__('Center mode')}
-                        checked={sliderCenterMode}
-                        onChange={(value) => setAttributes({sliderCenterMode: value})}
-                    />
-                </PanelBody>
-                <PanelBody
                     title={__('Loading', 'growtype-gallery')}
                 >
                     <ToggleControl
@@ -694,6 +645,15 @@ function GalleryEdit(props) {
                     />
                 </PanelBody>
             </InspectorControls>
+
+            <InspectorAdvancedControls>
+                <TextControl
+                    label={__('Gallery ID', 'growtype-gallery')}
+                    value={attributes.galleryId}
+                    onChange={galleryId => setAttributes({galleryId})}
+                />
+            </InspectorAdvancedControls>
+
             <BlockControls group="other">
                 <MediaReplaceFlow
                     allowedTypes={ALLOWED_MEDIA_TYPES}
