@@ -40,7 +40,7 @@ define('Growtype_Gallery_Version', '1.0.0');
 /**
  * Plugin base name
  */
-define('GROWTYPE_GALLERY_BASE_NAME', 'growtype-gallery');
+define('GROWTYPE_GALLERY_TEXT_DOMAIN', 'growtype-gallery');
 
 /**
  * Plugin dir path

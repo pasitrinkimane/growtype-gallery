@@ -36,7 +36,7 @@ class Growtype_Gallery_i18n
         load_plugin_textdomain(
             'growtype-gallery',
             false,
-            GROWTYPE_GALLERY_BASE_NAME . '/languages/'
+            GROWTYPE_GALLERY_TEXT_DOMAIN . '/languages/'
         );
     }
 }
