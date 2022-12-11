@@ -67,24 +67,24 @@ export function storyLoader() {
     /**
      * Mouse enter
      */
-    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"]').mouseenter(function () {
+    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"]').on('mouseenter touchstart', function () {
         let sliderKey = $(this).attr('id');
         stopStoryDisplayInterval(sliderKey);
     });
 
-    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .wp-block-image').mouseenter(function () {
+    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .wp-block-image').on('mouseenter touchstart', function () {
         displayStoryItem($(this), false);
     });
 
     /**
      * Mouse leave
      */
-    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"]').mouseleave(function () {
+    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"]').on('mouseleave touchend', function () {
         let sliderKey = $(this).attr('id');
         startStoryDisplayInterval(sliderKey)
     });
 
-    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .wp-block-image').mouseleave(function () {
+    $('.growtype-gallery-wrapper.loader-active[data-loader-type="story"] .wp-block-image').on('mouseleave touchend', function () {
         returnStoryItemsToInitialState($(this))
     });
 
