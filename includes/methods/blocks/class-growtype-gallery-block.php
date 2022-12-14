@@ -166,6 +166,7 @@ class Growtype_Gallery_Block
                                 'image_border_radius' => $image_border_radius,
                                 'loader_active' => $loader_active,
                                 'loader_type' => $loader_type,
+                                'index' => $key,
                             ]
                         );
 
