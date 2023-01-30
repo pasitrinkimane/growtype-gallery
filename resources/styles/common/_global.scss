@@ -8,21 +8,4 @@
       transition: all 0.5s;
     }
   }
-
-  .wp-block-image-inner {
-    .caption {
-      position: absolute;
-      background: white;
-      top: 30px;
-      padding: 10px;
-      border-radius: 0px 20px 20px 0px;
-      padding-right: 15px;
-      text-transform: uppercase;
-
-      p {
-        margin: 0;
-        font-size: 12px;
-      }
-    }
-  }
 }

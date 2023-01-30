@@ -72,8 +72,11 @@
     },
     "columns": {
       "type": "number",
-      "minimum": 1,
-      "maximum": 8
+      "minimum": 1
+    },
+    "columnsMobile": {
+      "type": "number",
+      "minimum": 1
     },
     "caption": {
       "type": "string",
@@ -106,6 +109,42 @@
       "type": "string",
       "default": ""
     },
+    "imagePreviewFormat": {
+      "type": "string",
+      "default": "original",
+      "options": [
+        {
+          "value": "original",
+          "label": "Original"
+        },
+        {
+          "value": "background_img",
+          "label": "Background image"
+        }
+      ]
+    },
+    "imagePreviewSize": {
+      "type": "string",
+      "default": "large",
+      "options": [
+        {
+          "value": "full",
+          "label": "Full"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "thumbnail",
+          "label": "Thumbnail"
+        }
+      ]
+    },
     "hasOverlay": {
       "type": "boolean",
       "default": false
@@ -124,15 +163,71 @@
     },
     "loaderType": {
       "type": "string",
-      "default": ""
+      "default": "",
+      "options": [
+        {
+          "value": "basic",
+          "label": "Basic"
+        },
+        {
+          "value": "story",
+          "label": "Story"
+        }
+      ]
+    },
+    "animationOnScrollEffect": {
+      "type": "string",
+      "default": "2",
+      "options": [
+        {
+          "value": "1",
+          "label": "Fade in"
+        },
+        {
+          "value": "2",
+          "label": "Slide up"
+        },
+        {
+          "value": "3",
+          "label": "Zoom"
+        },
+        {
+          "value": "4",
+          "label": "Flip"
+        },
+        {
+          "value": "5",
+          "label": "Roll"
+        },
+        {
+          "value": "6",
+          "label": "Drop"
+        },
+        {
+          "value": "7",
+          "label": "Flip horizontal"
+        },
+        {
+          "value": "8",
+          "label": "Pop out"
+        }
+      ]
     },
     "imageHeight": {
-      "type": "string",
-      "default": "100%"
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
     },
     "imageBorderRadius": {
-      "type": "string",
-      "default": "0px"
+      "type": "number",
+      "minimum": 0,
+      "maximum": 250
+    },
+    "imagePadding": {
+      "type": "number",
+      "default": 5,
+      "minimum": 0,
+      "maximum": 50
     },
     "galleryId": {
       "type": "string",

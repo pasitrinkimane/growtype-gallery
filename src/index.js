@@ -6,7 +6,7 @@
  *
  * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
  */
-import './style.scss';
+import './../resources/styles/growtype-gallery.scss';
 import './editor.scss';
 
 /**

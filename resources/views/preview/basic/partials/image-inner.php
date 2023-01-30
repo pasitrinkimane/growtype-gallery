@@ -7,7 +7,7 @@ if (isset($image_url) && !empty($image_url)) {
 <div class="wp-block-image-inner"
      alt="<?php echo $alt; ?>"
      title="<?php echo $caption; ?>"
-     style="background: url(<?php echo $preview_src; ?>);
+     style="background: url(<?php echo $img_preview_url; ?>);
          background-position: center;
          background-size: cover;
          padding-top: <?php echo $image_height; ?>;

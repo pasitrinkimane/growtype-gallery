@@ -52,6 +52,8 @@
     "@wordpress/blocks": "^11.17.0",
     "@wordpress/components": "^21.1.0",
     "@wordpress/scripts": "^24.2.0",
+    "imagesloaded": "^5.0.0",
+    "masonry-layout": "^4.2.2",
     "slick-carousel": "^1.8.1"
   }
 }

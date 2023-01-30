@@ -108,13 +108,17 @@ class Growtype_Gallery_Block
                         $has_overlay = $parsed_block["attrs"]['hasOverlay'] ?? '';
                         $overlay_color = isset($parsed_block["attrs"]['overlayColor']) ? $parsed_block["attrs"]['overlayColor'] : '';
                         $watermark = $parsed_block["attrs"]['watermark'] ?? '';
-                        $image_border_radius = $parsed_block["attrs"]['imageBorderRadius'] ?? '0px';
+                        $image_border_radius = isset($parsed_block["attrs"]['imageBorderRadius']) ? $parsed_block["attrs"]['imageBorderRadius'] . 'px' : '0';
+                        $image_preview_format = $parsed_block["attrs"]['imagePreviewFormat'] ?? 'original';
+                        $animation_on_scroll_effect = $parsed_block["attrs"]['animationOnScrollEffect'] ?? '2';
                         $group_name = $parsed_block["attrs"]['groupName'] ?? '';
-                        $image_height = $parsed_block["attrs"]['imageHeight'] ?? '100%';
+                        $image_height = isset($parsed_block["attrs"]['imageHeight']) ? $parsed_block["attrs"]['imageHeight'] . '%' : '100%';
+                        $image_padding = isset($parsed_block["attrs"]['imagePadding']) ? $parsed_block["attrs"]['imagePadding'] . 'px' : '5px';
                         $original_img_html = $parsed_block['innerBlocks'][$key]['innerContent'][0];
                         $loader_active = $parsed_block["attrs"]['loaderActive'] ?? false;
                         $loader_type = $parsed_block["attrs"]['loaderType'] ?? 'basic';
-                        $gallery_id = isset($parsed_block["attrs"]['galleryId']) && !empty($parsed_block["attrs"]['galleryId']) ? $parsed_block["attrs"]['galleryId'] : 'growtype-gallery-' . md5(rand());
+                        $gallery_id = isset($parsed_block["attrs"]['galleryId']) && !empty($parsed_block["attrs"]['galleryId']) ? $parsed_block["attrs"]['galleryId'] : md5(rand());
+                        $imagePreviewSize = $parsed_block["attrs"]["imagePreviewSize"] ?? 'large';
 
                         /**
                          * get original html parts
@@ -144,12 +148,21 @@ class Growtype_Gallery_Block
 
                         $original_image_url = wp_get_attachment_url($original_img_id);
 
+                        $img_preview_src = wp_get_attachment_image_src($original_img_id, $imagePreviewSize);
+                        $img_preview_url = $img_preview_src[0] ?? '';
+                        $img_preview_width = $img_preview_src[1] ?? '';
+                        $img_preview_height = $img_preview_src[2] ?? '';
+
                         $template_path = 'preview.' . $preview_style . '.index';
 
                         $new_img_html = growtype_gallery_include_view($template_path,
                             [
+                                'img_preview_src' => $img_preview_src,
+                                'img_width' => $img_preview_width,
+                                'img_height' => $img_preview_height,
                                 'id' => $inner_block['attrs']['id'],
-                                'preview_src' => $original_img_src,
+                                'img_preview_url' => $img_preview_url,
+                                'image_padding' => $image_padding,
                                 'src' => $original_image_url,
                                 'parent_class' => $original_figure_class,
                                 'child_class' => $original_img_class,
@@ -160,6 +173,7 @@ class Growtype_Gallery_Block
                                 'overlay_color' => $overlay_color,
                                 'overlay_icon' => $overlay_icon ?? false,
                                 'watermark' => $watermark,
+                                'image_preview_format' => $image_preview_format,
                                 'link_to' => $link_to,
                                 'group_name' => $group_name,
                                 'image_height' => $image_height,
@@ -183,14 +197,29 @@ class Growtype_Gallery_Block
                 ob_start();
 
                 ?>
-                <div id="<?php echo $gallery_id ?>" class="growtype-gallery-wrapper <?php echo $loader_active ? 'loader-active' : '' ?>"
+                <div id="growtype-gallery-<?php echo $gallery_id ?>" class="growtype-gallery-wrapper <?php echo $loader_active ? 'loader-active' : '' ?>"
                      data-loader-type="<?php echo $loader_type ?>"
                 >
-                    <figure class="<?php echo $parent_figure_class ?>">
+                    <div id="growtype-gallery-grid-<?php echo $gallery_id ?>" class="<?php echo $parent_figure_class ?> growtype-gallery-grid" data-grid-effect="<?php echo $animation_on_scroll_effect ?>">
                         <?php echo $images ?>
-                    </figure>
+                    </div>
                 </div>
                 <?php
+
+                $parameters['gallery_id'] = $gallery_id;
+
+                /**
+                 * Pass values to frontend
+                 */
+                add_action('wp_footer', function () use ($parameters) { ?>
+                    <script type="text/javascript">
+                        new AnimOnScroll(document.getElementById('growtype-gallery-grid-<?php echo $parameters['gallery_id'] ?>'), {
+                            minDuration: 0.4,
+                            maxDuration: 0.6,
+                            viewportFactor: 0.2
+                        });
+                    </script>
+                <?php }, 100);
 
                 $block_content = ob_get_clean();
             }

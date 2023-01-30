@@ -38,6 +38,8 @@ import {createBlock} from '@wordpress/blocks';
 import {createBlobURL} from '@wordpress/blob';
 import {store as noticesStore} from '@wordpress/notices';
 
+import blockJson from './block.json';
+
 /**
  * Internal dependencies
  */
@@ -97,7 +99,6 @@ function GalleryEdit(props) {
         sizeSlug,
         hasOverlay,
         overlayColor,
-        groupName,
         loaderActive,
         loaderType,
     } = attributes;
@@ -578,30 +579,72 @@ function GalleryEdit(props) {
                 <PanelBody
                     title={__('Preview', 'growtype-gallery')}
                 >
+                    <SelectControl
+                        label={__('Image preview size', 'growtype-gallery')}
+                        value={attributes.imagePreviewSize}
+                        options={blockJson.attributes.imagePreviewSize.options}
+                        onChange={(value) => setAttributes({imagePreviewSize: value})}
+                        hideCancelButton={true}
+                    />
+                    <SelectControl
+                        label={__('Image preview format', 'growtype-gallery')}
+                        value={attributes.imagePreviewFormat}
+                        options={blockJson.attributes.imagePreviewFormat.options}
+                        onChange={(value) => setAttributes({imagePreviewFormat: value})}
+                        hideCancelButton={true}
+                    />
                     {images.length > 1 && (
                         <RangeControl
-                            label={__('Columns')}
+                            label={__('Columns', 'growtype-gallery')}
                             value={
                                 columns
                                     ? columns
                                     : defaultColumnsNumber(images.length)
                             }
                             onChange={setColumnsNumber}
-                            min={1}
+                            min={blockJson.attributes.columns.minimum}
                             max={Math.min(MAX_COLUMNS, images.length)}
                             {...MOBILE_CONTROL_PROPS_RANGE_CONTROL}
                             required
                         />
                     )}
-                    <TextControl
-                        label={__('Image height', 'growtype-gallery')}
-                        onChange={(value) => setAttributes({imageHeight: value})}
+                    {images.length > 1 && (
+                        <RangeControl
+                            label={__('Columns - mobile', 'growtype-gallery')}
+                            value={attributes.columnsMobile}
+                            onChange={(value) => setAttributes({columnsMobile: value})}
+                            min={blockJson.attributes.columnsMobile.minimum}
+                            max={Math.min(MAX_COLUMNS, images.length)}
+                            {...MOBILE_CONTROL_PROPS_RANGE_CONTROL}
+                            required
+                        />
+                    )}
+                    <RangeControl
+                        label={__('Image height (%)', 'growtype-gallery')}
                         value={attributes.imageHeight}
+                        onChange={(value) => setAttributes({imageHeight: value})}
+                        min={blockJson.attributes.imageHeight.minimum}
+                        max={blockJson.attributes.imageHeight.maximum}
+                        {...MOBILE_CONTROL_PROPS_RANGE_CONTROL}
+                        required
                     />
-                    <TextControl
-                        label={__('Image border radius', 'growtype-gallery')}
-                        onChange={(value) => setAttributes({imageBorderRadius: value})}
+                    <RangeControl
+                        label={__('Image border radius (px)', 'growtype-gallery')}
                         value={attributes.imageBorderRadius}
+                        onChange={(value) => setAttributes({imageBorderRadius: value})}
+                        min={blockJson.attributes.imageBorderRadius.minimum}
+                        max={blockJson.attributes.imageBorderRadius.maximum}
+                        {...MOBILE_CONTROL_PROPS_RANGE_CONTROL}
+                        required
+                    />
+                    <RangeControl
+                        label={__('Image padding (px)', 'growtype-gallery')}
+                        value={attributes.imagePadding}
+                        onChange={(value) => setAttributes({imagePadding: value})}
+                        min={blockJson.attributes.imagePadding.minimum}
+                        max={blockJson.attributes.imagePadding.maximum}
+                        {...MOBILE_CONTROL_PROPS_RANGE_CONTROL}
+                        required
                     />
                     <ToggleControl
                         label={__('Crop images')}
@@ -634,13 +677,17 @@ function GalleryEdit(props) {
                         onChange={toggleLoader}
                     />
                     <SelectControl
-                        label={__('Loader type')}
-                        value={loaderType}
-                        options={[
-                            {value: 'basic', label: __('Basic')},
-                            {value: 'story', label: __('Story')}
-                        ]}
+                        label={__('Loader type', 'growtype-gallery')}
+                        value={attributes.loaderType}
+                        options={blockJson.attributes.loaderType.options}
                         onChange={(value) => setAttributes({loaderType: value})}
+                        hideCancelButton={true}
+                    />
+                    <SelectControl
+                        label={__('Animation on scroll effect', 'growtype-gallery')}
+                        value={attributes.animationOnScrollEffect}
+                        options={blockJson.attributes.animationOnScrollEffect.options}
+                        onChange={(value) => setAttributes({animationOnScrollEffect: value})}
                         hideCancelButton={true}
                     />
                 </PanelBody>

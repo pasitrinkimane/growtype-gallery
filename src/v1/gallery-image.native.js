@@ -29,7 +29,6 @@ import { arrowLeft, arrowRight, warning } from '@wordpress/icons';
  * Internal dependencies
  */
 import Button from './gallery-button';
-import style from './gallery-image-style.scss';
 
 const { compose } = StyleSheet;
 

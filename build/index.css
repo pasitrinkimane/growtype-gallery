@@ -1,1 +1,191 @@
-.wp-block-growtype-gallery input[type=text]{font-family:Arial,sans-serif;font-size:18px}.components-placeholder[data-type="growtype/gallery"].components-placeholder{min-height:auto}
+/*!***********************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/@wordpress/scripts/node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[3].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[3].use[3]!./resources/styles/growtype-gallery.scss ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************************/
+.wp-block-growtype-gallery a.wp-block-image-wrapper {
+  opacity: 0.8;
+  -webkit-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+}
+.wp-block-growtype-gallery a.wp-block-image-wrapper:hover {
+  opacity: 1;
+  -webkit-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+}
+
+.growtype-gallery-wrapper {
+  display: inline-block !important;
+  width: 100%;
+}
+.growtype-gallery-wrapper[data-loader-type=story] .loader {
+  position: absolute;
+  height: 8px;
+  width: calc(100% - 60px);
+  top: 25px;
+  left: 30px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  display: none;
+}
+.growtype-gallery-wrapper[data-loader-type=story] .loader .loader-inner {
+  width: 0%;
+  position: absolute;
+  background: white;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 10px;
+}
+.growtype-gallery-wrapper[data-slider-overflow=initial] .slick-list {
+  overflow: initial;
+}
+
+.wp-block-growtype-gallery {
+  gap: 0 !important;
+}
+.wp-block-growtype-gallery .wp-block-image {
+  padding: 5px;
+  float: left;
+  margin: 0;
+}
+.wp-block-growtype-gallery .wp-block-image.is-style-rounded .wp-block-image-inner {
+  border-radius: 500px;
+}
+.wp-block-growtype-gallery .wp-block-image .watermark {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  color: white;
+  font-size: 14px;
+  text-align: left;
+  padding: 10px 20px;
+}
+.wp-block-growtype-gallery.columns-1 .wp-block-image {
+  width: 100%;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.wp-block-growtype-gallery.columns-2 .wp-block-image {
+  width: 50%;
+}
+.wp-block-growtype-gallery.columns-3 .wp-block-image {
+  width: 33.3333333333%;
+}
+.wp-block-growtype-gallery.columns-4 .wp-block-image {
+  width: 25%;
+}
+.wp-block-growtype-gallery.columns-5 .wp-block-image {
+  width: 20%;
+}
+.wp-block-growtype-gallery.columns-6 .wp-block-image {
+  width: 16.6666666667%;
+}
+.wp-block-growtype-gallery.columns-7 .wp-block-image {
+  width: 14.2857142857%;
+}
+.wp-block-growtype-gallery.columns-8 .wp-block-image {
+  width: 12.5%;
+}
+@media only screen and (max-width: 640px) {
+  .wp-block-growtype-gallery.columns-mobile-1 .wp-block-image {
+    width: 100%;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+@media only screen and (max-width: 640px) {
+  .wp-block-growtype-gallery.columns-mobile-2 .wp-block-image {
+    width: 50%;
+  }
+}
+@media only screen and (max-width: 640px) {
+  .wp-block-growtype-gallery.columns-mobile-3 .wp-block-image {
+    width: 33.3333333333%;
+  }
+}
+@media only screen and (max-width: 640px) {
+  .wp-block-growtype-gallery.columns-mobile-4 .wp-block-image {
+    width: 25%;
+  }
+}
+@media only screen and (max-width: 640px) {
+  .wp-block-growtype-gallery.columns-mobile-5 .wp-block-image {
+    width: 20%;
+  }
+}
+@media only screen and (max-width: 640px) {
+  .wp-block-growtype-gallery.columns-mobile-6 .wp-block-image {
+    width: 16.6666666667%;
+  }
+}
+@media only screen and (max-width: 640px) {
+  .wp-block-growtype-gallery.columns-mobile-7 .wp-block-image {
+    width: 14.2857142857%;
+  }
+}
+@media only screen and (max-width: 640px) {
+  .wp-block-growtype-gallery.columns-mobile-8 .wp-block-image {
+    width: 12.5%;
+  }
+}
+.wp-block-growtype-gallery .blocks-gallery-caption {
+  display: inline-block;
+  width: 100%;
+}
+.wp-block-growtype-gallery .wp-block-image-inner {
+  float: left;
+  overflow: hidden;
+  position: relative;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}
+.wp-block-growtype-gallery .wp-block-image-inner .overlay {
+  height: 100%;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+.wp-block-growtype-gallery .wp-block-image-inner .caption {
+  position: absolute;
+  background: white;
+  top: 30px;
+  padding: 10px;
+  border-radius: 0px 20px 20px 0px;
+  padding-right: 15px;
+  color: black;
+}
+.wp-block-growtype-gallery .wp-block-image-inner .caption p {
+  margin: 0;
+  font-size: 12px;
+}
+.wp-block-growtype-gallery .wp-block-image[data-img-preview-format=background_img] .wp-block-image-inner {
+  padding-top: 100%;
+}
+.wp-block-growtype-gallery.slick-initialized {
+  display: inline-block !important;
+  width: 100%;
+}
+/*!************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/@wordpress/scripts/node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[3].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[3].use[3]!./src/editor.scss ***!
+  \************************************************************************************************************************************************************************************************************************************************************************/
+/**
+ * The following styles get applied inside the editor only.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+.wp-block-growtype-gallery input[type=text] {
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+}
+
+.components-placeholder[data-type="growtype/gallery"].components-placeholder {
+  min-height: initial;
+}
+
+/*# sourceMappingURL=index.css.map*/
