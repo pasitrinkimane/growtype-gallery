@@ -100,25 +100,30 @@ class Growtype_Gallery_Block
                 $xpath = new DOMXPath($doc);
                 $parent_figure_class = $xpath->evaluate("string(//figure/@class)");
 
+                $link_to = $parsed_block["attrs"]["linkTo"];
+                $has_overlay = $parsed_block["attrs"]['hasOverlay'] ?? '';
+                $overlay_color = isset($parsed_block["attrs"]['overlayColor']) ? $parsed_block["attrs"]['overlayColor'] : '';
+                $watermark = $parsed_block["attrs"]['watermark'] ?? '';
+                $image_border_radius = isset($parsed_block["attrs"]['imageBorderRadius']) ? $parsed_block["attrs"]['imageBorderRadius'] . 'px' : '0';
+                $image_preview_format = $parsed_block["attrs"]['imagePreviewFormat'] ?? 'original';
+                $animation_on_scroll_effect = $parsed_block["attrs"]['animationOnScrollEffect'] ?? '2';
+                $group_name = $parsed_block["attrs"]['groupName'] ?? '';
+                $image_height = isset($parsed_block["attrs"]['imageHeight']) ? $parsed_block["attrs"]['imageHeight'] . '%' : '100%';
+                $image_padding = isset($parsed_block["attrs"]['imagePadding']) ? $parsed_block["attrs"]['imagePadding'] . 'px' : '5px';
+                $loader_active = $parsed_block["attrs"]['loaderActive'] ?? false;
+                $loader_type = $parsed_block["attrs"]['loaderType'] ?? 'basic';
+                $gallery_id = isset($parsed_block["attrs"]['galleryId']) && !empty($parsed_block["attrs"]['galleryId']) ? $parsed_block["attrs"]['galleryId'] : md5(rand());
+                $imagePreviewSize = $parsed_block["attrs"]["imagePreviewSize"] ?? 'large';
+                $imageMainSize = $parsed_block["attrs"]["sizeSlug"] ?? 'large';
+                $previewGridStyle = $parsed_block["attrs"]["previewGridStyle"] ?? 'none';
+
                 $images = [];
+                $images_details = [];
                 foreach ($parsed_block['innerBlocks'] as $key => $inner_block) {
                     if ('core/image' === $inner_block['blockName']) {
-                        $link_to = $parsed_block["attrs"]["linkTo"];
                         $preview_style = 'basic';
-                        $has_overlay = $parsed_block["attrs"]['hasOverlay'] ?? '';
-                        $overlay_color = isset($parsed_block["attrs"]['overlayColor']) ? $parsed_block["attrs"]['overlayColor'] : '';
-                        $watermark = $parsed_block["attrs"]['watermark'] ?? '';
-                        $image_border_radius = isset($parsed_block["attrs"]['imageBorderRadius']) ? $parsed_block["attrs"]['imageBorderRadius'] . 'px' : '0';
-                        $image_preview_format = $parsed_block["attrs"]['imagePreviewFormat'] ?? 'original';
-                        $animation_on_scroll_effect = $parsed_block["attrs"]['animationOnScrollEffect'] ?? '2';
-                        $group_name = $parsed_block["attrs"]['groupName'] ?? '';
-                        $image_height = isset($parsed_block["attrs"]['imageHeight']) ? $parsed_block["attrs"]['imageHeight'] . '%' : '100%';
-                        $image_padding = isset($parsed_block["attrs"]['imagePadding']) ? $parsed_block["attrs"]['imagePadding'] . 'px' : '5px';
-                        $original_img_html = $parsed_block['innerBlocks'][$key]['innerContent'][0];
-                        $loader_active = $parsed_block["attrs"]['loaderActive'] ?? false;
-                        $loader_type = $parsed_block["attrs"]['loaderType'] ?? 'basic';
-                        $gallery_id = isset($parsed_block["attrs"]['galleryId']) && !empty($parsed_block["attrs"]['galleryId']) ? $parsed_block["attrs"]['galleryId'] : md5(rand());
-                        $imagePreviewSize = $parsed_block["attrs"]["imagePreviewSize"] ?? 'large';
+                        $img_unique_id = 'growtype-gallery-image-' . uniqid();
+                        $original_img_html = $inner_block['innerContent'][0];
 
                         /**
                          * get original html parts
@@ -146,7 +151,10 @@ class Growtype_Gallery_Block
                             $image_url = $xpath->evaluate("string(//a/@href)");
                         }
 
-                        $original_image_url = wp_get_attachment_url($original_img_id);
+                        $img_original_src = wp_get_attachment_image_src($original_img_id, $imageMainSize);
+                        $img_original_url = $img_original_src[0] ?? '';
+                        $img_original_width = $img_original_src[1] ?? '';
+                        $img_original_height = $img_original_src[2] ?? '';
 
                         $img_preview_src = wp_get_attachment_image_src($original_img_id, $imagePreviewSize);
                         $img_preview_url = $img_preview_src[0] ?? '';
@@ -155,36 +163,48 @@ class Growtype_Gallery_Block
 
                         $template_path = 'preview.' . $preview_style . '.index';
 
-                        $new_img_html = growtype_gallery_include_view($template_path,
-                            [
-                                'img_preview_src' => $img_preview_src,
-                                'img_width' => $img_preview_width,
-                                'img_height' => $img_preview_height,
-                                'id' => $inner_block['attrs']['id'],
-                                'img_preview_url' => $img_preview_url,
-                                'image_padding' => $image_padding,
-                                'src' => $original_image_url,
-                                'parent_class' => $original_figure_class,
-                                'child_class' => $original_img_class,
-                                'alt' => $original_img_alt,
-                                'caption' => $original_img_caption,
-                                'caption_link' => $caption_url,
-                                'overlay' => $has_overlay,
-                                'overlay_color' => $overlay_color,
-                                'overlay_icon' => $overlay_icon ?? false,
-                                'watermark' => $watermark,
-                                'image_preview_format' => $image_preview_format,
-                                'link_to' => $link_to,
-                                'group_name' => $group_name,
-                                'image_height' => $image_height,
-                                'image_url' => $image_url,
-                                'image_border_radius' => $image_border_radius,
-                                'loader_active' => $loader_active,
-                                'loader_type' => $loader_type,
-                                'index' => $key,
-                            ]
-                        );
+                        $image_details = [
+                            'img_preview_src' => $img_preview_src,
+                            'img_width' => $img_preview_width,
+                            'img_height' => $img_preview_height,
+                            'id' => $inner_block['attrs']['id'],
+                            'img_preview_url' => $img_preview_url,
+                            'image_padding' => $image_padding,
+                            'src' => $img_original_url,
+                            'parent_class' => $original_figure_class,
+                            'child_class' => $original_img_class,
+                            'alt' => $original_img_alt,
+                            'caption' => $original_img_caption,
+                            'caption_link' => $caption_url,
+                            'overlay' => $has_overlay,
+                            'overlay_color' => $overlay_color,
+                            'overlay_icon' => $overlay_icon ?? false,
+                            'watermark' => $watermark,
+                            'image_preview_format' => $image_preview_format,
+                            'link_to' => $link_to,
+                            'group_name' => $group_name,
+                            'image_height' => $image_height,
+                            'image_url' => $image_url,
+                            'image_border_radius' => $image_border_radius,
+                            'loader_active' => $loader_active,
+                            'loader_type' => $loader_type,
+                            'index' => $key,
+                            'img_unique_id' => $img_unique_id,
+                            'post_id' => null,
+                            'preview_grid_style' => $previewGridStyle,
+                        ];
 
+                        if ($link_to === 'popup' && !empty($image_url)) {
+                            if (strpos($image_url, '#id_') !== false) {
+                                $image_details['post_id'] = str_replace('#id_', '', $image_url);
+                            } else {
+                                $image_details['post_id'] = url_to_postid($image_url);
+                            }
+                        }
+
+                        $new_img_html = growtype_gallery_include_view($template_path, $image_details);
+
+                        array_push($images_details, $image_details);
                         array_push($images, $new_img_html);
                     }
                 }
@@ -192,19 +212,43 @@ class Growtype_Gallery_Block
                 $loader_active = $parsed_block["attrs"]['loaderActive'] ?? false;
                 $loader_type = $parsed_block["attrs"]['loaderType'] ?? '';
 
-                $images = implode('', $images);
+                $imagesHtml = implode('', $images);
 
                 ob_start();
-
                 ?>
                 <div id="growtype-gallery-<?php echo $gallery_id ?>" class="growtype-gallery-wrapper <?php echo $loader_active ? 'loader-active' : '' ?>"
                      data-loader-type="<?php echo $loader_type ?>"
+                     data-preview-grid-style="<?php echo $previewGridStyle ?>"
                 >
                     <div id="growtype-gallery-grid-<?php echo $gallery_id ?>" class="<?php echo $parent_figure_class ?> growtype-gallery-grid" data-grid-effect="<?php echo $animation_on_scroll_effect ?>">
-                        <?php echo $images ?>
+                        <?php echo $imagesHtml ?>
                     </div>
                 </div>
                 <?php
+                if ($link_to === 'popup') {
+                    foreach ($images_details as $image_details) {
+                        $post_id = $image_details['post_id'];
+                        $post = !empty($post_id) ? get_post($post_id) : null;
+
+                        if (empty($post)) {
+                            continue;
+                        }
+                        ?>
+                        <div class="modal modal-growtype-gallery fade" id="<?php echo $image_details['img_unique_id'] ?>" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body"><?php echo apply_filters('the_content', $post->post_content); ?></div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                }
+
+                $block_content = ob_get_clean();
 
                 $parameters['gallery_id'] = $gallery_id;
 
@@ -220,8 +264,6 @@ class Growtype_Gallery_Block
                         });
                     </script>
                 <?php }, 100);
-
-                $block_content = ob_get_clean();
             }
         }
 

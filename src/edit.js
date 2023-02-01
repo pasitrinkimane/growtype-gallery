@@ -56,6 +56,7 @@ import {
     LINK_DESTINATION_LIGHTBOX,
     LINK_DESTINATION_MEDIA,
     LINK_DESTINATION_NONE,
+    LINK_DESTINATION_POPUP,
 } from './constants';
 
 import useImageSizes from './use-image-sizes';
@@ -67,8 +68,9 @@ const MAX_COLUMNS = 8;
 const linkOptions = [
     {value: LINK_DESTINATION_ATTACHMENT, label: __('Attachment Page')},
     {value: LINK_DESTINATION_MEDIA, label: __('Media File')},
-    {value: LINK_DESTINATION_NONE, label: _x('None', 'Media item link option')},
-    {value: LINK_DESTINATION_LIGHTBOX, label: _x('Lightbox')},
+    {value: LINK_DESTINATION_NONE, label: __('None')},
+    {value: LINK_DESTINATION_LIGHTBOX, label: __('Lightbox')},
+    {value: LINK_DESTINATION_POPUP, label: __('Popup')},
 ];
 
 const ALLOWED_MEDIA_TYPES = ['image'];
@@ -100,7 +102,6 @@ function GalleryEdit(props) {
         hasOverlay,
         overlayColor,
         loaderActive,
-        loaderType,
     } = attributes;
 
     const {
@@ -532,9 +533,10 @@ function GalleryEdit(props) {
                         options={linkOptions}
                         hideCancelButton={true}
                     />
-                    {hasLinkTo && (
+
+                    {(linkTo === LINK_DESTINATION_MEDIA || linkTo === LINK_DESTINATION_ATTACHMENT) && (
                         <ToggleControl
-                            label={__('Open in new tab')}
+                            label={__('Open in new tab', 'growtype-gallery')}
                             checked={linkTarget === '_blank'}
                             onChange={toggleOpenInNewTab}
                         />
@@ -549,15 +551,16 @@ function GalleryEdit(props) {
                         />
                     )}
 
-                    {imageSizeOptions?.length > 0 && (
+                    {imageSizeOptions?.length > 0 && (linkTo === LINK_DESTINATION_MEDIA || linkTo === LINK_DESTINATION_ATTACHMENT || linkTo === LINK_DESTINATION_LIGHTBOX) && (
                         <SelectControl
-                            label={__('Image size')}
+                            label={__('Main image size')}
                             value={sizeSlug}
                             options={imageSizeOptions}
                             onChange={updateImagesSize}
                             hideCancelButton={true}
                         />
                     )}
+
                     {Platform.isWeb && !imageSizeOptions && hasImageIds && (
                         <BaseControl className={'gallery-image-sizes'}>
                             <BaseControl.VisualLabel>
@@ -569,12 +572,6 @@ function GalleryEdit(props) {
                             </View>
                         </BaseControl>
                     )}
-                    <TextControl
-                        label={__('Watermark', 'growtype-gallery')}
-                        help={__('Visible on every image.', 'growtype-gallery')}
-                        onChange={setWatermark}
-                        value={attributes.watermark}
-                    />
                 </PanelBody>
                 <PanelBody
                     title={__('Preview', 'growtype-gallery')}
@@ -591,6 +588,13 @@ function GalleryEdit(props) {
                         value={attributes.imagePreviewFormat}
                         options={blockJson.attributes.imagePreviewFormat.options}
                         onChange={(value) => setAttributes({imagePreviewFormat: value})}
+                        hideCancelButton={true}
+                    />
+                    <SelectControl
+                        label={__('Grid style', 'growtype-gallery')}
+                        value={attributes.previewGridStyle}
+                        options={blockJson.attributes.previewGridStyle.options}
+                        onChange={(value) => setAttributes({previewGridStyle: value})}
                         hideCancelButton={true}
                     />
                     {images.length > 1 && (
@@ -667,6 +671,12 @@ function GalleryEdit(props) {
                             copyFormat="rgb"
                         />
                     )}
+                    <TextControl
+                        label={__('Watermark', 'growtype-gallery')}
+                        help={__('Visible on every image.', 'growtype-gallery')}
+                        onChange={setWatermark}
+                        value={attributes.watermark}
+                    />
                 </PanelBody>
                 <PanelBody
                     title={__('Loading', 'growtype-gallery')}

@@ -9,3 +9,38 @@
     }
   }
 }
+
+.growtype-gallery-wrapper {
+  display: inline-block !important;
+  width: 100%;
+
+  &[data-loader-type="story"] {
+    .loader {
+      position: absolute;
+      height: 8px;
+      width: calc(100% - 60px);
+      top: 25px;
+      left: 30px;
+      border-radius: 10px;
+      background: rgb(255 255 255 / 30%);
+      display: none;
+
+      .loader-inner {
+        width: 0%;
+        position: absolute;
+        background: white;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-radius: 10px;
+      }
+    }
+  }
+
+  &[data-slider-overflow="initial"] {
+    .slick-list {
+      overflow: initial;
+    }
+  }
+}
