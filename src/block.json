@@ -99,7 +99,7 @@
     },
     "sizeSlug": {
       "type": "string",
-      "default": "large"
+      "default": "full"
     },
     "allowResize": {
       "type": "boolean",
@@ -128,20 +128,20 @@
       "default": "large",
       "options": [
         {
-          "value": "full",
-          "label": "Full"
-        },
-        {
-          "value": "large",
-          "label": "Large"
+          "value": "thumbnail",
+          "label": "Thumbnail"
         },
         {
           "value": "medium",
           "label": "Medium"
         },
         {
-          "value": "thumbnail",
-          "label": "Thumbnail"
+          "value": "large",
+          "label": "Large"
+        },
+        {
+          "value": "full",
+          "label": "Full"
         }
       ]
     },

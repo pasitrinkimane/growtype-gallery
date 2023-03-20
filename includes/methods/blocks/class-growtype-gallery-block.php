@@ -114,7 +114,7 @@ class Growtype_Gallery_Block
                 $loader_type = $parsed_block["attrs"]['loaderType'] ?? 'basic';
                 $gallery_id = isset($parsed_block["attrs"]['galleryId']) && !empty($parsed_block["attrs"]['galleryId']) ? $parsed_block["attrs"]['galleryId'] : md5(rand());
                 $imagePreviewSize = $parsed_block["attrs"]["imagePreviewSize"] ?? 'large';
-                $imageMainSize = $parsed_block["attrs"]["sizeSlug"] ?? 'large';
+                $imageMainSize = $parsed_block["attrs"]["sizeSlug"] ?? 'full';
                 $previewGridStyle = $parsed_block["attrs"]["previewGridStyle"] ?? 'none';
 
                 $images = [];
@@ -153,6 +153,7 @@ class Growtype_Gallery_Block
 
                         $img_original_src = wp_get_attachment_image_src($original_img_id, $imageMainSize);
                         $img_original_url = $img_original_src[0] ?? '';
+
                         $img_original_width = $img_original_src[1] ?? '';
                         $img_original_height = $img_original_src[2] ?? '';
 
@@ -219,6 +220,7 @@ class Growtype_Gallery_Block
                 <div id="growtype-gallery-<?php echo $gallery_id ?>" class="growtype-gallery-wrapper <?php echo $loader_active ? 'loader-active' : '' ?>"
                      data-loader-type="<?php echo $loader_type ?>"
                      data-preview-grid-style="<?php echo $previewGridStyle ?>"
+                     data-preview-format="<?php echo $image_preview_format ?>"
                 >
                     <div id="growtype-gallery-grid-<?php echo $gallery_id ?>" class="<?php echo $parent_figure_class ?> growtype-gallery-grid" data-grid-effect="<?php echo $animation_on_scroll_effect ?>">
                         <?php echo $imagesHtml ?>

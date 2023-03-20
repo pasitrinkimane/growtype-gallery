@@ -25,6 +25,12 @@
     }
   }
 
+  &.columns-default {
+    .wp-block-image {
+      width: calc(100% / 3);
+    }
+  }
+
   &.columns-1 {
     .wp-block-image {
       width: calc(100% / 1);

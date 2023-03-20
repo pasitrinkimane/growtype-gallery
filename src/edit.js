@@ -590,13 +590,15 @@ function GalleryEdit(props) {
                         onChange={(value) => setAttributes({imagePreviewFormat: value})}
                         hideCancelButton={true}
                     />
-                    <SelectControl
-                        label={__('Grid style', 'growtype-gallery')}
-                        value={attributes.previewGridStyle}
-                        options={blockJson.attributes.previewGridStyle.options}
-                        onChange={(value) => setAttributes({previewGridStyle: value})}
-                        hideCancelButton={true}
-                    />
+                    {
+                        attributes.imagePreviewFormat === 'background_img' ? <SelectControl
+                            label={__('Grid style', 'growtype-gallery')}
+                            value={attributes.previewGridStyle}
+                            options={blockJson.attributes.previewGridStyle.options}
+                            onChange={(value) => setAttributes({previewGridStyle: value})}
+                            hideCancelButton={true}
+                        /> : ''
+                    }
                     {images.length > 1 && (
                         <RangeControl
                             label={__('Columns', 'growtype-gallery')}
