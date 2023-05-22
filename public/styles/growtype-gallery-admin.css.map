@@ -1,0 +1,1 @@
+{"version":3,"file":"styles/growtype-gallery-admin.css","mappings":"AAAA,2BACE,qBACA,UACF,C","sources":["webpack://plugin/./resources/styles/growtype-gallery-admin.scss"],"sourcesContent":[".wp-block-growtype-gallery{\n  display: inline-block;\n  width: 100%;\n}\n"],"names":[],"sourceRoot":""}
