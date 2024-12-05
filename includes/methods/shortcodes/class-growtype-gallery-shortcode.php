@@ -19,10 +19,9 @@ class Growtype_Gallery_Shortcode
      */
     function growtype_gallery_shortcode($atts)
     {
-//        extract(shortcode_atts(array (
-//            'post_type' => 'post',
-//        ), $atts));
-//
-//        return $render;
+        $params = apply_filters('growtype_gallery_shortcode_params', [], $atts);
+        $content = Growtype_Gallery_Block::render_images($params);
+
+        return $content;
     }
 }
