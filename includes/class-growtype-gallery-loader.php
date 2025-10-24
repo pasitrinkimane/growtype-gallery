@@ -149,12 +149,12 @@ class Growtype_Gallery_Loader
          * shortcode
          */
         require_once GROWTYPE_GALLERY_PATH . 'includes/methods/shortcodes/class-growtype-gallery-shortcode.php';
-        $this->loader = new Growtype_Gallery_Shortcode();
+        new Growtype_Gallery_Shortcode();
 
         /**
          * block
          */
         require_once GROWTYPE_GALLERY_PATH . 'includes/methods/blocks/class-growtype-gallery-block.php';
-        $this->loader = new Growtype_Gallery_Block();
+        new Growtype_Gallery_Block();
     }
 }
