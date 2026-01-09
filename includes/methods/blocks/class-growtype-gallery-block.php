@@ -123,7 +123,10 @@ class Growtype_Gallery_Block
                 class="<?php echo esc_attr($parent_figure_class); ?> growtype-gallery-grid"
                 data-grid-effect="<?php echo esc_attr($animation_on_scroll_effect); ?>"
             >
-                <?php echo $images_html; ?>
+                <?php 
+                // SECURITY: $images_html is safe - generated internally from WordPress functions and controlled templates
+                echo $images_html; 
+                ?>
             </div>
         </div>
         <?php
